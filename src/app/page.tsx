@@ -38,7 +38,7 @@ export default function HomePage() {
       <div className="max-w-4xl w-full space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Tec-Net Solutions QuizKnow
+            Tech-Net Solutions QuizKnow
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600">
             Empower your learning journey with our comprehensive platform designed for students, instructors, and administrators.
