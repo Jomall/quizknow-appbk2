@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Tec-Net Solutions QuizKnow",
+  title: "Tech-Net Solutions QuizKnow",
   description: "A modern quiz platform built with Next.js",
 };
 
