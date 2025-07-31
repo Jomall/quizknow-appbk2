@@ -6,12 +6,25 @@ export interface User {
   enrolledCourses: string[];
   createdCourses: string[];
   createdAt: Date;
+  // For instructors
+  isApproved?: boolean; // For instructor approval system
   // For students
   instructorRequests?: string[]; // IDs of instructors the student has requested to connect with
   connectedInstructors?: string[]; // IDs of instructors the student is connected to
   // For instructors
   studentRequests?: InstructorRequest[]; // Requests from students
   connectedStudents?: string[]; // IDs of students the instructor is connected to
+}
+
+export interface InstructorApprovalRequest {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  message?: string;
+  status: 'pending' | 'approved' | 'declined';
+  createdAt: Date;
+  respondedAt?: Date;
 }
 
 export interface InstructorRequest {

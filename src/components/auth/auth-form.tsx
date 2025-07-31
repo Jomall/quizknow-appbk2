@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { storage } from '@/lib/data/storage';
 import { User } from '@/lib/types';
+import { InstructorApprovalStorage } from '@/lib/data/instructor-approval-storage';
 
 interface AuthFormProps {
   mode: 'login' | 'register';
@@ -20,11 +21,13 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [role, setRole] = useState<'student' | 'instructor'>('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setLoading(true);
 
     try {
@@ -37,6 +40,12 @@ export function AuthForm({ mode }: AuthFormProps) {
           return;
         }
         
+        // Check if instructor is approved
+        if (user.role === 'instructor' && !user.isApproved) {
+          setError('Your instructor account is pending approval. Please wait for admin approval.');
+          return;
+        }
+        
         storage.setCurrentUser(user);
         redirectToDashboard(user.role);
       } else {
@@ -45,20 +54,54 @@ export function AuthForm({ mode }: AuthFormProps) {
           return;
         }
 
-        const newUser: User = {
-          id: Date.now().toString(),
-          email,
-          name,
-          role,
-          enrolledCourses: [],
-          createdCourses: [],
-          createdAt: new Date(),
-        };
+        // For instructors, create a pending approval request instead of immediate account
+        if (role === 'instructor') {
+          // Create the user first
+          const newUser: User = {
+            id: Date.now().toString(),
+            email,
+            name,
+            role,
+            enrolledCourses: [],
+            createdCourses: [],
+            createdAt: new Date(),
+            isApproved: false, // Not approved yet
+          };
 
-        users.push(newUser);
-        storage.saveUsers(users);
-        storage.setCurrentUser(newUser);
-        redirectToDashboard(newUser.role);
+          users.push(newUser);
+          storage.saveUsers(users);
+          
+          // Create approval request
+          InstructorApprovalStorage.createRequest(
+            newUser.id,
+            name,
+            email,
+            'New instructor registration'
+          );
+          
+          setSuccessMessage('Registration successful! Your instructor account is pending admin approval.');
+          // Reset form
+          setEmail('');
+          setName('');
+          setPassword('');
+          setRole('student');
+        } else {
+          // For students and admins, create account immediately
+          const newUser: User = {
+            id: Date.now().toString(),
+            email,
+            name,
+            role,
+            enrolledCourses: [],
+            createdCourses: [],
+            createdAt: new Date(),
+          };
+
+          users.push(newUser);
+          storage.saveUsers(users);
+          storage.setCurrentUser(newUser);
+          redirectToDashboard(newUser.role);
+        }
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -148,6 +191,10 @@ export function AuthForm({ mode }: AuthFormProps) {
             <div className="text-sm text-red-600">{error}</div>
           )}
 
+          {successMessage && (
+            <div className="text-sm text-green-600">{successMessage}</div>
+          )}
+
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Loading...' : mode === 'login' ? 'Sign In' : 'Create Account'}
           </Button>
@@ -155,4 +202,6 @@ export function AuthForm({ mode }: AuthFormProps) {
       </CardContent>
     </Card>
   );
+
 }
+

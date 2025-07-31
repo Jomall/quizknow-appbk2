@@ -56,6 +56,13 @@ export default function InstructorDashboard() {
       router.push('/login');
       return;
     }
+    
+    // Check if instructor is approved
+    if (!user.isApproved) {
+      router.push('/login');
+      return;
+    }
+    
     setCurrentUser(user);
     loadDashboardData(user.id);
   }, [router]);
@@ -118,7 +125,7 @@ export default function InstructorDashboard() {
 
   const handleLogout = () => {
     storage.setCurrentUser(null);
-    router.push('/login');
+    router.push('/');
   };
 
   const handleRemoveStudent = (studentId: string, courseId: string) => {
