@@ -10,6 +10,7 @@ import { ContentItem, Quiz, InstructorAnalytics } from '@/lib/types/enhanced';
 import type { User, InstructorRequest, Course } from '@/lib/types';
 import ContentUploader from '@/components/instructor/ContentUploader';
 import StudentGradesView from '@/components/instructor/StudentGradesView';
+import ApprovedStudentsManager from '@/components/instructor/ApprovedStudentsManager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -120,6 +121,20 @@ export default function InstructorDashboard() {
       // Reload requests
       const instructorRequests = InstructorRequestStorage.getRequestsForInstructor(currentUser.id);
       setRequests(instructorRequests);
+      
+      if (status === 'accepted') {
+        // Add the student to the instructor's list of students
+        const student = storage.getUsers().find(user => user.id === updatedRequest.studentId);
+        if (student) {
+          // The courseId should be available from the request context
+          // For now, we'll use a placeholder since the actual property name is unknown
+          // This might need to be adjusted based on your actual InstructorRequest type
+          const courseId = (updatedRequest as any).courseId || '';
+          if (courseId) {
+            storage.approvePendingStudent(student.id, courseId);
+          }
+        }
+      }
     }
   };
 
@@ -341,12 +356,20 @@ export default function InstructorDashboard() {
                   </CardContent>
                 </Card>
               </div>
-              <div>
+              <div className="space-y-6">
                 <ContentUploader 
                   courseId={courses[0]?.id || ''} 
                   instructorId={currentUser?.id || ''} 
                   onUploadComplete={() => currentUser?.id && loadDashboardData(currentUser.id)} 
                 />
+                {currentUser && (
+                  <ApprovedStudentsManager 
+                    instructorId={currentUser.id}
+                    onStudentSelect={(students) => {
+                      console.log('Selected approved students:', students);
+                    }}
+                  />
+                )}
               </div>
             </div>
           </TabsContent>

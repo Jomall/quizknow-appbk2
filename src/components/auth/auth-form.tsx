@@ -20,6 +20,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [name, setName] = useState('');
   const [role, setRole] = useState<'student' | 'instructor'>('student');
   const [error, setError] = useState('');
+  const [phone, setPhone] = useState(''); // Phone number state
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
@@ -62,6 +63,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             email,
             name,
             role,
+            phone, // Include phone number
             enrolledCourses: [],
             createdCourses: [],
             createdAt: new Date(),
@@ -85,6 +87,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           setName('');
           setPassword('');
           setRole('student');
+          setPhone(''); // Reset phone number
         } else {
           // For students and admins, create account immediately
           const newUser: User = {
@@ -92,6 +95,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             email,
             name,
             role,
+            phone, // Include phone number
             enrolledCourses: [],
             createdCourses: [],
             createdAt: new Date(),
@@ -161,6 +165,20 @@ export function AuthForm({ mode }: AuthFormProps) {
             </div>
           )}
 
+          {mode === 'register' && (
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="123-456-7890"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
@@ -195,6 +213,17 @@ export function AuthForm({ mode }: AuthFormProps) {
             <div className="text-sm text-green-600">{successMessage}</div>
           )}
 
+          {mode === 'login' && (
+            <div className="text-center">
+              <a 
+                href="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                Forgot your password?
+              </a>
+            </div>
+          )}
+          
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Loading...' : mode === 'login' ? 'Sign In' : 'Create Account'}
           </Button>
@@ -202,6 +231,4 @@ export function AuthForm({ mode }: AuthFormProps) {
       </CardContent>
     </Card>
   );
-
 }
-

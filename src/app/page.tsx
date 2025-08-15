@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { storage } from '@/lib/data/storage';
+import { getCurrentUser } from '@/lib/data/user-storage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -14,7 +15,7 @@ export default function HomePage() {
   }, []);
 
   const handleGetStarted = () => {
-    const currentUser = storage.getCurrentUser();
+    const currentUser = getCurrentUser();
     if (currentUser) {
       // If user is already logged in, redirect to their dashboard
       switch (currentUser.role) {

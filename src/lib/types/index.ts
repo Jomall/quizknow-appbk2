@@ -4,6 +4,8 @@ export interface User {
   name: string;
   role: 'student' | 'instructor' | 'admin';
   enrolledCourses: string[];
+  password?: string; // Add password field
+  phone?: string; // Add phone number property
   createdCourses: string[];
   createdAt: Date;
   // For instructors
