@@ -6,6 +6,7 @@ export interface User {
   enrolledCourses: string[];
   password?: string; // Add password field
   phone?: string; // Add phone number property
+  avatar?: string; // Add avatar URL property
   createdCourses: string[];
   createdAt: Date;
   // For instructors
