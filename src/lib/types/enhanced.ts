@@ -104,4 +104,69 @@ export interface InstructorAnalytics {
   averageQuizScore: number;
   activeSubmissions: number;
   pendingGrades: number;
+  
+  // Enhanced metrics
+  activeStudents: number;
+  quizAttempts: number;
+  contentViews: number;
+  avgSessionTime: number;
+  totalContent: number;
+  
+  // Performance tracking
+  topPerformers: Array<{
+    id: string;
+    name: string;
+    averageScore: number;
+    completionRate: number;
+    lastActivity: Date;
+  }>;
+  
+  studentsNeedingAttention: Array<{
+    id: string;
+    name: string;
+    averageScore: number;
+    lastSubmission: Date;
+    daysSinceLastActivity: number;
+  }>;
+  
+  // Content analytics
+  mostViewedContent: Array<{
+    id: string;
+    title: string;
+    type: string;
+    views: number;
+    engagementRate: number;
+  }>;
+  
+  highestCompletionContent: Array<{
+    id: string;
+    title: string;
+    completionRate: number;
+    averageScore: number;
+  }>;
+  
+  contentTypeDistribution: Array<{
+    type: string;
+    count: number;
+    percentage: number;
+  }>;
+  
+  // Quiz performance trends
+  quizPerformanceTrends: Array<{
+    date: string;
+    averageScore: number;
+    completionRate: number;
+    participationRate: number;
+  }>;
+  
+  // Engagement metrics
+  engagementLevels: Array<{
+    level: string;
+    count: number;
+    percentage: number;
+  }>;
+  
+  // Real-time updates
+  lastUpdated: Date;
+  isLive: boolean;
 }
