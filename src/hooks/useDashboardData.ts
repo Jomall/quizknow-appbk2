@@ -124,3 +124,31 @@ export function useExportData(format: 'csv' | 'pdf' | 'excel', filters?: FilterO
     },
   });
 }
+
+// Combined dashboard data hook for EnhancedDashboardMetrics
+export function useDashboardData(filters?: any, refreshKey?: number) {
+  const dashboardFilters = filters ? {
+    dateRange: filters.dateRange ? {
+      from: filters.dateRange.start,
+      to: filters.dateRange.end
+    } : undefined,
+    course: filters.searchTerm,
+    assignmentType: filters.assignmentTypes?.length > 0 ? filters.assignmentTypes[0] : undefined,
+  } : undefined;
+
+  const { data, isLoading, error } = useDashboardMetrics(dashboardFilters);
+  
+  return {
+    data: data || {
+      totalStudents: 0,
+      totalAssignments: 0,
+      averageScore: 0,
+      completionRate: 0,
+      recentActivity: [],
+      assignmentStats: [],
+      scoreDistribution: [],
+    },
+    loading: isLoading,
+    error: error?.message || null,
+  };
+}
