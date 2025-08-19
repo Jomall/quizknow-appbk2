@@ -1,14 +1,24 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useCallback } from 'react';
 
 export interface DashboardMetrics {
   totalStudents: number;
   totalAssignments: number;
+  totalInstructors: number;
+  pendingRequests: number;
+  activeAssignments: number;
+  completedAssignments: number;
+  connectionRate: number;
   averageScore: number;
   completionRate: number;
   recentActivity: any[];
   assignmentStats: any[];
   scoreDistribution: any[];
+  weeklyActivity: number[];
+  assignmentTypes: { type: string; count: number }[];
+  completionTrend: { date: string; completed: number; assigned: number }[];
+  lastUpdated: string;
 }
 
 export interface FilterOptions {
