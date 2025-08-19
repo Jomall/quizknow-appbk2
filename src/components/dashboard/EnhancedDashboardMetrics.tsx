@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Line, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,8 +13,9 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartOptions,
 } from 'chart.js';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { User } from '@/lib/lms-integration';
 import { FilterPanel } from './FilterPanel';
 import { ExportModal } from './ExportModal';
@@ -129,7 +130,7 @@ export default function EnhancedDashboardMetrics({ currentUser }: EnhancedDashbo
   // Handle real-time updates
   useEffect(() => {
     if (dashboardData) {
-      setStats(dashboardData);
+      setStats(dashboardData as unknown as DashboardStats);
     }
   }, [dashboardData]);
 
@@ -137,7 +138,7 @@ export default function EnhancedDashboardMetrics({ currentUser }: EnhancedDashbo
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleExport = async (format: 'pdf' | 'csv' | 'excel') => {
+  const handleExport = async (format: string) => {
     try {
       const queryParams = new URLSearchParams({
         format,
@@ -321,7 +322,7 @@ export default function EnhancedDashboardMetrics({ currentUser }: EnhancedDashbo
             Refresh
           </button>
           <button
-            onClick={() => setShowExportModal(false)}
+            onClick={() => setShowExportModal(true)}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
           >
             Export

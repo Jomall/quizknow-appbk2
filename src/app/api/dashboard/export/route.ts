@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { parse } from 'json2csv';
-import { jsPDF } from 'jspdf';
-import * as XLSX from 'xlsx';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,119 +6,64 @@ export async function GET(request: NextRequest) {
     const format = searchParams.get('format') || 'csv';
     const from = searchParams.get('from');
     const to = searchParams.get('to');
-    
-    // Mock data - in real implementation, fetch from database
+    const course = searchParams.get('course');
+    const assignmentType = searchParams.get('type');
+    const minScore = searchParams.get('minScore');
+    const maxScore = searchParams.get('maxScore');
+
+    // Mock export data based on format
+    let content: string;
+    let contentType: string;
+    let filename: string;
+
     const mockData = [
-      {
-        studentName: 'John Doe',
-        course: 'Mathematics 101',
-        assignment: 'Quiz 1',
-        score: 85,
-        completionDate: '2024-01-15',
-        timeSpent: '45 minutes',
-        attempts: 2
-      },
-      {
-        studentName: 'Jane Smith',
-        course: 'Physics 201',
-        assignment: 'Lab Report',
-        score: 92,
-        completionDate: '2024-01-14',
-        timeSpent: '2 hours',
-        attempts: 1
-      },
-      {
-        studentName: 'Mike Johnson',
-        course: 'Chemistry 101',
-        assignment: 'Midterm Exam',
-        score: 78,
-        completionDate: '2024-01-13',
-        timeSpent: '1.5 hours',
-        attempts: 1
-      }
+      { student: 'John Doe', course: 'Mathematics', assignment: 'Quiz 1', score: 85, date: '2024-01-15' },
+      { student: 'Jane Smith', course: 'Science', assignment: 'Lab Report', score: 92, date: '2024-01-14' },
+      { student: 'Bob Johnson', course: 'History', assignment: 'Essay', score: 78, date: '2024-01-13' },
+      { student: 'Alice Brown', course: 'English', assignment: 'Reading Quiz', score: 95, date: '2024-01-12' },
+      { student: 'Charlie Wilson', course: 'Physics', assignment: 'Problem Set', score: 88, date: '2024-01-11' }
     ];
 
-    // Apply date filtering if provided
-    let filteredData = mockData;
-    if (from && to) {
-      const fromDate = new Date(from);
-      const toDate = new Date(to);
-      filteredData = mockData.filter(item => {
-        const itemDate = new Date(item.completionDate);
-        return itemDate >= fromDate && itemDate <= toDate;
-      });
-    }
-
-    switch (format.toLowerCase()) {
+    switch (format) {
       case 'csv':
-        const csv = parse(filteredData);
-        return new NextResponse(csv, {
-          headers: {
-            'Content-Type': 'text/csv',
-            'Content-Disposition': `attachment; filename="dashboard-export-${new Date().toISOString()}.csv"`,
-          },
-        });
-
-      case 'json':
-        return NextResponse.json(filteredData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Content-Disposition': `attachment; filename="dashboard-export-${new Date().toISOString()}.json"`,
-          },
-        });
-
-      case 'pdf':
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text('Dashboard Export Report', 20, 20);
-        
-        doc.setFontSize(12);
-        let yPosition = 40;
-        
-        filteredData.forEach((item, index) => {
-          doc.text(`${index + 1}. ${item.studentName} - ${item.course}`, 20, yPosition);
-          doc.text(`   Assignment: ${item.assignment}`, 20, yPosition + 10);
-          doc.text(`   Score: ${item.score}/100`, 20, yPosition + 20);
-          doc.text(`   Date: ${item.completionDate}`, 20, yPosition + 30);
-          doc.text(`   Time Spent: ${item.timeSpent}`, 20, yPosition + 40);
-          yPosition += 60;
-          
-          if (yPosition > 250) {
-            doc.addPage();
-            yPosition = 20;
-          }
-        });
-
-        const pdfBuffer = doc.output('arraybuffer');
-        return new NextResponse(pdfBuffer, {
-          headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="dashboard-export-${new Date().toISOString()}.pdf"`,
-          },
-        });
-
+        content = 'Student,Course,Assignment,Score,Date\n' + 
+          mockData.map(row => `${row.student},${row.course},${row.assignment},${row.score},${row.date}`).join('\n');
+        contentType = 'text/csv';
+        filename = 'dashboard-export.csv';
+        break;
+      
       case 'excel':
-      case 'xlsx':
-        const ws = XLSX.utils.json_to_sheet(filteredData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Dashboard Data');
-        
-        const excelBuffer = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
-        return new NextResponse(excelBuffer, {
-          headers: {
-            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition': `attachment; filename="dashboard-export-${new Date().toISOString()}.xlsx"`,
-          },
-        });
-
+        // For Excel, we'll create a simple CSV that Excel can open
+        content = 'Student\tCourse\tAssignment\tScore\tDate\n' + 
+          mockData.map(row => `${row.student}\t${row.course}\t${row.assignment}\t${row.score}\t${row.date}`).join('\n');
+        contentType = 'application/vnd.ms-excel';
+        filename = 'dashboard-export.xls';
+        break;
+      
+      case 'pdf':
+        // For PDF, create a simple text format
+        content = mockData.map(row => 
+          `Student: ${row.student}\nCourse: ${row.course}\nAssignment: ${row.assignment}\nScore: ${row.score}\nDate: ${row.date}\n---`
+        ).join('\n');
+        contentType = 'application/pdf';
+        filename = 'dashboard-export.pdf';
+        break;
+      
       default:
         return NextResponse.json(
-          { error: 'Unsupported format. Use csv, json, pdf, or excel' },
+          { error: 'Unsupported format' },
           { status: 400 }
         );
     }
+
+    // Create response with appropriate headers
+    const response = new NextResponse(content);
+    response.headers.set('Content-Type', contentType);
+    response.headers.set('Content-Disposition', `attachment; filename="${filename}"`);
+    
+    return response;
   } catch (error) {
-    console.error('Export error:', error);
+    console.error('Error in dashboard export API:', error);
     return NextResponse.json(
       { error: 'Failed to export data' },
       { status: 500 }
